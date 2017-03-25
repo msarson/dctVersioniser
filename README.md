@@ -1,16 +1,16 @@
-# dctVersioniser
-Clarion Dictionary Versoniser
-DCTVersioniser
+# Clarion Dictionary Versoniser
 
 A little tool to help with version control of a clarion DCT
 
-Requirements:
+# Requirements:
 
 DotNet 4.5
 
-Commandline:
+# Commandline:
 
 DCTVersioniser.exe
+
+# Instructions
 
 On first run the appliction will want you to locate your clarion 10 bin.
 
