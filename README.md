@@ -6,11 +6,15 @@ A little tool to help with version control of a clarion DCT
 
 DotNet 4.5, Newtonsoft Json.Net (http://www.newtonsoft.com/json), CommandLine (http://commandline.codeplex.com/)
 
-# Commandline:
+# Command line:
+
+To get help for command line options
 
 DCTVersioniser.exe --help
 
 # Instructions
+
+This program can be used either by passing parameters from the command line or by just running the application without any parameters.
 
 On first run the appliction will want you to locate your clarion 10 bin.
 
