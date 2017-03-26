@@ -2,7 +2,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Xml;
 
 namespace DCTVersioniser
@@ -21,21 +20,31 @@ namespace DCTVersioniser
         /// <summary>
         /// Exports a clarion dct to a dctx file
         /// </summary>
-        void ExportDctxToTemp()
+        bool ExportDctxToTemp()
         {
             Console.WriteLine("Exporting DCT");
-            StartProcess(new ProcessStartInfo
+            var startInfo = new ProcessStartInfo
             {
                 FileName = ClarionLocation + "\\ClarionCl.exe",
                 Arguments = ExportCommandLine
-            });
+            };
+            if (!StartProcess(startInfo))
+                return false;
+            return true;
         }
         private void ExportDictionaryToJson()
         {
 
-            ExportDctxToTemp();
-            ConvertDctxToJsonAndSave();
-            File.Delete(TemporyDctxName);
+            if (ExportDctxToTemp())
+            {
+                ConvertDctxToJsonAndSave();
+                File.Delete(TemporyDctxName);
+            }
+            else
+            {
+                Console.WriteLine("Failed to export dictionary. Press any key to exit.");
+                Console.ReadLine();
+            }
         }
 
 
@@ -57,24 +66,27 @@ namespace DCTVersioniser
         /// DCT
         /// </summary>
         /// <param name="dctxFileName"></param>
-        void ImportDictionary()
+        bool ImportDictionary()
         {
             Console.WriteLine("Importing JSON into DCT");
-            StartProcess(new ProcessStartInfo
+            var startInfo = new ProcessStartInfo
             {
                 FileName = ClarionLocation + "\\ClarionCl.exe",
                 Arguments = ImportCommandLine
-            });
+            };
+            return StartProcess(startInfo);
         }
 
         private void ImportDictionaryFromJson()
         {
             var json = File.ReadAllText(DctOrJsonLocation);
             XmlDocument newDoc = JsonConvert.DeserializeXmlNode(json);
-            using (FileStream fs = new FileStream(ImportDctxName,
-                    FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+            using (FileStream fs = new FileStream(ImportDctxName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
                 newDoc.Save(fs);
-            ImportDictionary();
+            if (!ImportDictionary()) {
+                Console.WriteLine("Failed to import Json file. Press Any Key");
+                Console.ReadLine();
+            }
             File.Delete(ImportDctxName);
         }
 
@@ -82,14 +94,23 @@ namespace DCTVersioniser
         /// Start a new shell process
         /// </summary>
         /// <param name="info"></param>
-        private void StartProcess(ProcessStartInfo info)
+        private bool StartProcess(ProcessStartInfo info)
         {
             info.ErrorDialog = true;
             info.WindowStyle = ProcessWindowStyle.Hidden;
             info.UseShellExecute = false;
             Process process = new Process() { StartInfo = info };
-            process.Start();
-            process.WaitForExit(1000 * 60 * 5);    // Wait up to five minutes.
+            if (!process.Start())
+            {
+                //process failed to start
+                return false;
+            }
+            if (!process.WaitForExit(1000 * 60 * 5))    // Wait up to five minutes.
+            {
+                //process failed and timed out
+                return false;
+            }
+            return true;
         }
 
 
@@ -173,13 +194,19 @@ namespace DCTVersioniser
                 if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.dct)|*.json", "Select DCT File for export or Json File for import", out dct))
                     return;
                 DctOrJsonLocation = dct;
-                string ext = Path.GetExtension(DctOrJsonLocation);
-                if (Path.GetExtension(DctOrJsonLocation).ToUpper() == ".DCT")
-                    ExportDictionaryToJson();
-                else
-                    ImportDictionaryFromJson();
-                //Remove the created dictionary
-
+                switch (Path.GetExtension(DctOrJsonLocation).ToUpper())
+                {
+                    case ".DCT":
+                        ExportDictionaryToJson();
+                        break;
+                    case ".JSON":
+                        ImportDictionaryFromJson();
+                        break;
+                    default:
+                        Console.WriteLine("Invalid file selected");
+                        Console.ReadLine();
+                        break;
+                }
             }
         }
 
