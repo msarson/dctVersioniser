@@ -14,6 +14,8 @@ DCTVersioniser.exe --help
 
 # Instructions
 
+A write up of the tool can be found here: https://clarionhub.com/t/how-to-compare-dct-version-using-dctversioniser/1090
+
 This program can be used either by passing parameters from the command line or by just running the application without any parameters.
 
 On first run the appliction will want you to locate your clarion 10 bin.
