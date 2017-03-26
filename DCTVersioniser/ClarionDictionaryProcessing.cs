@@ -30,7 +30,7 @@ namespace DCTVersioniser
         private string GetExportCommandLine()
         {
             
-            return $"-dx {DctOrJsonLocation} {GetTempDctxName()}";
+            return $@"-dx ""{DctOrJsonLocation}"" ""{GetTempDctxName()}""";
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace DCTVersioniser
         string GetImportCommandLine(string dctxFileName)
         {
            
-            return $"-di {GetDictionaryName(dctxFileName)} {dctxFileName}";
+            return $@"-di ""{GetDictionaryName(dctxFileName)}"" ""{dctxFileName}""";
         }
 
         /// <summary>
@@ -126,7 +126,8 @@ namespace DCTVersioniser
                 if (AccuraFileDialog.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.dct)|*.json", "Select DCT File for export or Json File for import", out dct))
                     return;
                 DctOrJsonLocation = dct;
-                if (Path.GetExtension(DctOrJsonLocation).ToUpper() == "DCT")
+                string ext = Path.GetExtension(DctOrJsonLocation);
+                if (Path.GetExtension(DctOrJsonLocation).ToUpper() == ".DCT")
                 {
                     var jsonFileName = Path.GetDirectoryName(DctOrJsonLocation) + "\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + ".json";
                     ExportDictionary();
