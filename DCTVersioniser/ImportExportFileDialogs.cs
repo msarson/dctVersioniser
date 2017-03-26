@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 namespace DCTVersioniser
 {
-    public static class AccuraFileDialog
+    public static class ImportExportFileDialogs
     {
         public static bool OpenFileDialog(string filter, string title, out string FileName)
         {

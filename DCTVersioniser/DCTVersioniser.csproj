@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccuraFileDialog.cs" />
+    <Compile Include="ImportExportFileDialogs.cs" />
     <Compile Include="ClarionDictionaryProcessing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

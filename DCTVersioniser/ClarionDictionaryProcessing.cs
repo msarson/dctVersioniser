@@ -10,50 +10,34 @@ namespace DCTVersioniser
     public class ClarionDictionaryProcessing
     {
 
+        private void ConvertDctxToJsonAndSave()
+        {
+            var doc = new XmlDocument();
+            doc.Load(TemporyDctxName);
+            string json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
+            WriteFile(ExportJsonFileName, json);
+        }
+
         /// <summary>
         /// Exports a clarion dct to a dctx file
         /// </summary>
-        void ExportDictionary()
+        void ExportDctxToTemp()
         {
             Console.WriteLine("Exporting DCT");
             StartProcess(new ProcessStartInfo
             {
                 FileName = ClarionLocation + "\\ClarionCl.exe",
-                Arguments = GetExportCommandLine()
+                Arguments = ExportCommandLine
             });
         }
-
-        /// <summary>
-        /// Gets the ClarionCl command line to export the dct to a dctx
-        /// </summary>
-        /// <returns>string command line for exporting to dctx</returns>
-        private string GetExportCommandLine()
+        private void ExportDictionaryToJson()
         {
-            
-            return $@"-dx ""{DctOrJsonLocation}"" ""{GetTempDctxName()}""";
+
+            ExportDctxToTemp();
+            ConvertDctxToJsonAndSave();
+            File.Delete(TemporyDctxName);
         }
 
-        /// <summary>
-        /// Get the dictionary name from a passed in dctx name
-        /// </summary>
-        /// <param name="dctxFileName"></param>
-        /// <returns></returns>
-        string GetDictionaryName(string dctxFileName)
-        {
-            return Path.GetDirectoryName(dctxFileName) + "\\" + Path.GetFileNameWithoutExtension(dctxFileName) + ".dct";
-        }
-
-
-        /// <summary>
-        /// Gets the ClarionCl command line to import a dctx into a dct
-        /// creating or overwriting the dct in the process
-        /// </summary>
-        /// <returns>string command line for exporting to dctx</returns>
-        string GetImportCommandLine(string dctxFileName)
-        {
-           
-            return $@"-di ""{GetDictionaryName(dctxFileName)}"" ""{dctxFileName}""";
-        }
 
         /// <summary>
         /// Find out location of the clarioncl.exe folder and if the file
@@ -62,20 +46,10 @@ namespace DCTVersioniser
         /// <returns>string Location of the file</returns>
         string GetLocationOfClarionCL()
         {
-            string clarionClLocation = AccuraFileDialog.GetClarionCLLocation();
+            string clarionClLocation = ImportExportFileDialogs.GetClarionCLLocation();
             if (clarionClLocation == null || !File.Exists(clarionClLocation + "\\ClarionCl.Exe"))
-                AccuraFileDialog.SelectClarionCL(out clarionClLocation);
+                ImportExportFileDialogs.SelectClarionCL(out clarionClLocation);
             return clarionClLocation;
-        }
-
-
-        /// <summary>
-        /// Get location of tempory dctx file
-        /// </summary>
-        /// <returns>string Location of the file</returns>
-        string GetTempDctxName()
-        {
-            return $"{Path.GetTempPath()}{Path.GetFileNameWithoutExtension(DctOrJsonLocation)}.DCTX";
         }
 
         /// <summary>
@@ -83,16 +57,26 @@ namespace DCTVersioniser
         /// DCT
         /// </summary>
         /// <param name="dctxFileName"></param>
-        void ImportDictionary(string dctxFileName)
+        void ImportDictionary()
         {
             Console.WriteLine("Importing JSON into DCT");
             StartProcess(new ProcessStartInfo
             {
                 FileName = ClarionLocation + "\\ClarionCl.exe",
-                Arguments = GetImportCommandLine(dctxFileName)
+                Arguments = ImportCommandLine
             });
         }
 
+        private void ImportDictionaryFromJson()
+        {
+            var json = File.ReadAllText(DctOrJsonLocation);
+            XmlDocument newDoc = JsonConvert.DeserializeXmlNode(json);
+            using (FileStream fs = new FileStream(ImportDctxName,
+                    FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                newDoc.Save(fs);
+            ImportDictionary();
+            File.Delete(ImportDctxName);
+        }
 
         /// <summary>
         /// Start a new shell process
@@ -112,7 +96,70 @@ namespace DCTVersioniser
 
         private string ClarionLocation { get; set; }
         string DctOrJsonLocation { get; set; }
-        
+
+        /// <summary>
+        /// Gets the ClarionCl command line to export the dct to a dctx
+        /// </summary>
+        /// <returns>string command line for exporting to dctx</returns>
+        private string ExportCommandLine
+        {
+            get
+            {
+                return $@"-dx ""{DctOrJsonLocation}"" ""{TemporyDctxName}""";
+            }
+        }
+        string ExportJsonFileName
+        {
+            get
+            {
+                return Path.GetDirectoryName(DctOrJsonLocation) + "\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + ".json";
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the ClarionCl command line to import a dctx into a dct
+        /// creating or overwriting the dct in the process
+        /// </summary>
+        /// <returns>string command line for exporting to dctx</returns>
+        string ImportCommandLine
+        {
+            get
+            {
+                return $@"-di ""{ImportDictionaryName}"" ""{ImportDctxName}""";
+            }
+        }
+
+        string ImportDctxName
+        {
+            get
+            {
+                return Path.GetDirectoryName(DctOrJsonLocation) + "\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + ".dctx";
+            }
+        }
+
+
+        string ImportDictionaryName
+        {
+            get
+            {
+                return Path.GetDirectoryName(ImportDctxName) + "\\" + Path.GetFileNameWithoutExtension(ImportDctxName) + ".dct";
+            }
+        }
+
+
+        /// <summary>
+        /// Location of tempory dctx file
+        /// </summary>
+        /// <returns>string Location of the file</returns>
+        string TemporyDctxName
+        {
+            get
+            {
+                return $"{Path.GetTempPath()}{Path.GetFileNameWithoutExtension(DctOrJsonLocation)}.DCTX";
+            }
+        }
+
         /// <summary>
         /// starting block for the conversion
         /// </summary>
@@ -123,31 +170,14 @@ namespace DCTVersioniser
             if (File.Exists(ClarionLocation + "\\ClarionCl.Exe"))
             {
                 var dct = string.Empty;
-                if (AccuraFileDialog.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.dct)|*.json", "Select DCT File for export or Json File for import", out dct))
+                if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.dct)|*.json", "Select DCT File for export or Json File for import", out dct))
                     return;
                 DctOrJsonLocation = dct;
                 string ext = Path.GetExtension(DctOrJsonLocation);
                 if (Path.GetExtension(DctOrJsonLocation).ToUpper() == ".DCT")
-                {
-                    var jsonFileName = Path.GetDirectoryName(DctOrJsonLocation) + "\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + ".json";
-                    ExportDictionary();
-                    XmlDocument doc = new XmlDocument();
-                    doc.Load(GetTempDctxName());
-                    string json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
-                    WriteFile(jsonFileName, json);
-                    File.Delete(GetTempDctxName());
-                }
+                    ExportDictionaryToJson();
                 else
-                {
-
-                    var json = File.ReadAllText(DctOrJsonLocation);
-                    var dctxFileName = Path.GetDirectoryName(DctOrJsonLocation) + "\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + ".dctx";
-                    XmlDocument newDoc = JsonConvert.DeserializeXmlNode(json);
-                    using (FileStream fs = new FileStream(dctxFileName,
-                            FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-                        newDoc.Save(fs);
-                    ImportDictionary(dctxFileName);
-                }
+                    ImportDictionaryFromJson();
                 //Remove the created dictionary
 
             }
@@ -160,7 +190,7 @@ namespace DCTVersioniser
         /// <param name="text"></param>
         public void WriteFile(string FileName, string text)
         {
-            System.IO.File.WriteAllText(FileName, text);
+            File.WriteAllText(FileName, text);
         }
     }
 }
