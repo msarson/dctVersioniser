@@ -8,6 +8,12 @@ namespace DCTVersioniser
 {
     public class ClarionDictionaryProcessing
     {
+        private Options options;
+
+        public ClarionDictionaryProcessing(Options options)
+        {
+            this.options = options;
+        }
 
         private void ConvertDctxToJsonAndSave()
         {
@@ -83,7 +89,8 @@ namespace DCTVersioniser
             XmlDocument newDoc = JsonConvert.DeserializeXmlNode(json);
             using (FileStream fs = new FileStream(ImportDctxName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
                 newDoc.Save(fs);
-            if (!ImportDictionary()) {
+            if (!ImportDictionary())
+            {
                 Console.WriteLine("Failed to import Json file. Press Any Key");
                 Console.ReadLine();
             }
@@ -186,13 +193,22 @@ namespace DCTVersioniser
         /// </summary>
         public void ProcessDictionary()
         {
-
-            ClarionLocation = GetLocationOfClarionCL();
+            if (options.ClarionClPath != null)
+                ClarionLocation = Path.GetDirectoryName(options.ClarionClPath);
+            else
+                ClarionLocation = GetLocationOfClarionCL();
             if (File.Exists(ClarionLocation + "\\ClarionCl.Exe"))
             {
                 var dct = string.Empty;
-                if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.dct)|*.json", "Select DCT File for export or Json File for import", out dct))
-                    return;
+                if (options.FileToProcess != null)
+                {
+                    dct = options.FileToProcess;
+                }
+                else
+                {
+                    if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.dct)|*.json", "Select DCT File for export or Json File for import", out dct))
+                        return;
+                }
                 DctOrJsonLocation = dct;
                 switch (Path.GetExtension(DctOrJsonLocation).ToUpper())
                 {

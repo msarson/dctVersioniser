@@ -4,11 +4,11 @@ A little tool to help with version control of a clarion DCT
 
 # Requirements:
 
-DotNet 4.5, Newtonsoft Json.Net (http://www.newtonsoft.com/json)
+DotNet 4.5, Newtonsoft Json.Net (http://www.newtonsoft.com/json), CommandLine (http://commandline.codeplex.com/)
 
 # Commandline:
 
-DCTVersioniser.exe
+DCTVersioniser.exe --help
 
 # Instructions
 
