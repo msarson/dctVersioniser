@@ -5,6 +5,9 @@ namespace DCTVersioniser
 {
     public class Options
     {
+        [Option('h', "togglehistory", HelpText = "Turn on/off history saving of json", Required = false)]
+        public bool TurnOnHistory { get; set; }
+
         [Option('c', "ccl", HelpText = "The full path and name of ClarionCl.exe",Required =false)]
         public string ClarionClPath { get; set; }
         [Option('f', "file", HelpText = "The file to process (DCT/JSON)",Required =false)]

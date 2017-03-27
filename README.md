@@ -26,5 +26,6 @@ If you select a DCT the application will create a json file of the DCT for you.
 If you select a JSON dictionary file, the application will create a dct with the same name as the JSON file, using the JSON file to create the dct.
 
 # Updates
-2007-03-27 10:40 - Versioniser will now create two JSON files when versioning a dct file. The original file as already specified.
+2017-03-27 10:40 - Versioniser will now create two JSON files when versioning a dct file. The original file as already specified.
                    A history file in DCT-History folder.
+2017-03-27 11;21 - Added ability to turn on/off history folder saving. It will be off as default but can be turned on/off by using the commandline DctVersioniser -h

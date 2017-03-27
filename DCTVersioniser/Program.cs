@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.IO;
 
 namespace DCTVersioniser
@@ -12,6 +13,24 @@ namespace DCTVersioniser
             var options = new Options();
             if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
+                if(options.TurnOnHistory)
+                {
+                    var historyValue = (int?)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "history", null);
+                    switch (historyValue)
+                    {
+                        case null:
+                        case 0:
+                            Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "history", 1);
+                            Console.WriteLine("History is turned on");
+                            break;
+                        default:
+                            Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "history", 0);
+                            Console.WriteLine("History is turned off");
+                            break;
+                    }
+
+                    return;
+                }
                 if(options.ClarionClPath != null)
                 {
                     if (!options.ClarionClPath.ToLower().Contains("clarioncl.exe"))

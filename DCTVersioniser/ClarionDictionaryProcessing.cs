@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +13,7 @@ namespace DCTVersioniser
 
         public ClarionDictionaryProcessing(Options options)
         {
+            
             this.options = options;
         }
 
@@ -21,7 +23,9 @@ namespace DCTVersioniser
             doc.Load(TemporyDctxName);
             string json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
             WriteFile(ExportJsonFileName, json);
-            WriteFile(ExportJsonFileNameHistory, json);
+            var historyValue = (int?)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "history", null);
+            if(historyValue != null && historyValue == 1)
+                WriteFile(ExportJsonFileNameHistory, json);
         }
 
         /// <summary>
