@@ -24,3 +24,7 @@ You will then get an open file dialog which allows you to select DCT or JSON fil
 
 If you select a DCT the application will create a json file of the DCT for you.
 If you select a JSON dictionary file, the application will create a dct with the same name as the JSON file, using the JSON file to create the dct.
+
+# Updates
+2007-03-27 10:40 - Versioniser will now create two JSON files when versioning a dct file. The original file as already specified.
+                   A history file in DCT-History folder.

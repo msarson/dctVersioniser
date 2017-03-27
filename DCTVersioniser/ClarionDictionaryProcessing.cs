@@ -21,6 +21,7 @@ namespace DCTVersioniser
             doc.Load(TemporyDctxName);
             string json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
             WriteFile(ExportJsonFileName, json);
+            WriteFile(ExportJsonFileNameHistory, json);
         }
 
         /// <summary>
@@ -136,6 +137,21 @@ namespace DCTVersioniser
                 return $@"-dx ""{DctOrJsonLocation}"" ""{TemporyDctxName}""";
             }
         }
+        string DateTimeStamp
+        {
+            get
+            {
+                return "--" + DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "--" +
+                    DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
+            }
+        }
+        string ExportJsonFileNameHistory
+        {
+            get
+            {
+                return Path.GetDirectoryName(DctOrJsonLocation) + "\\DCT-History\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + DateTimeStamp + ".json";
+            }
+        }
         string ExportJsonFileName
         {
             get
@@ -143,7 +159,6 @@ namespace DCTVersioniser
                 return Path.GetDirectoryName(DctOrJsonLocation) + "\\" + Path.GetFileNameWithoutExtension(DctOrJsonLocation) + ".json";
             }
         }
-
 
         /// <summary>
         /// Gets the ClarionCl command line to import a dctx into a dct
@@ -233,6 +248,8 @@ namespace DCTVersioniser
         /// <param name="text"></param>
         public void WriteFile(string FileName, string text)
         {
+            var DirName = Path.GetDirectoryName(FileName);
+            DirectoryInfo di = Directory.CreateDirectory(DirName);
             File.WriteAllText(FileName, text);
         }
     }
