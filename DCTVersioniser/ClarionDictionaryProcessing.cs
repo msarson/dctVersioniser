@@ -10,10 +10,11 @@ namespace DCTVersioniser
     public class ClarionDictionaryProcessing
     {
         Options options;
-
+        Settings settings;
         public ClarionDictionaryProcessing(Options options)
         {
             this.options = options;
+            settings = new Settings();
         }
 
         void ConvertDctxToJsonAndSave()
@@ -23,25 +24,11 @@ namespace DCTVersioniser
             var json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
             Console.WriteLine("Saving file: " + JsonName);
             WriteFile(JsonName, json);
-            if (SaveHistory)
+            if (settings.SaveHistory)
             {
                 Console.WriteLine("Saving file: " + ExportJsonFileNameHistory);
                 WriteFile(ExportJsonFileNameHistory, json);
             }
-        }
-
-        static bool SaveHistory
-        {
-            get
-            {
-                return GetRegValue("history") == null || (int)GetRegValue("history") == 0 ? false : true;
-                // Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "history", null) == null ? 0 : 1;
-            }
-        }
-
-        static object GetRegValue(string value, object defaultValue = null)
-        {
-            return Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", value, defaultValue);
         }
 
         /// <summary>
@@ -67,26 +54,31 @@ namespace DCTVersioniser
             Console.WriteLine("Failed to export dictionary. Press any key to exit.");
             Console.ReadLine();
         }
-
+      
 
         /// <summary>
         /// Find out location of the clarioncl.exe folder and if the file
         /// exists
         /// </summary>
         /// <returns>string Location of the file</returns>
-        string GetLocationOfClarionCL()
+        string GetCommandLineLocation()
         {
-            var clarionClLocation = ImportExportFileDialogs.ClarionBinFolderLocation;
-            if (clarionClLocation == null || !File.Exists(clarionClLocation + "\\ClarionCl.Exe"))
-                ImportExportFileDialogs.SelectClarionCL(out clarionClLocation);
-            return clarionClLocation;
+            var binDir = settings.BinDirectoryLocation;
+            if (binDir == null || !File.Exists(binDir + "\\ClarionCl.Exe"))
+            {
+                binDir =  ImportExportFileDialogs.SelectClarionCL();
+                if (binDir != null)
+                    settings.BinDirectoryLocation = binDir;
+            }
+            return binDir;
         }
 
+  
         ProcessStartInfo GetStartInfoForExport()
         {
             return new ProcessStartInfo
             {
-                FileName = ClarionLocation + "\\ClarionCl.exe",
+                FileName = CommandLineLocation + "\\ClarionCl.exe",
                 Arguments = ExportCommandLine,
                 ErrorDialog = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
@@ -98,7 +90,7 @@ namespace DCTVersioniser
         {
             return new ProcessStartInfo
             {
-                FileName = ClarionLocation + "\\ClarionCl.exe",
+                FileName = CommandLineLocation + "\\ClarionCl.exe",
                 Arguments = ImportCommandLine,
                 ErrorDialog = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
@@ -132,6 +124,23 @@ namespace DCTVersioniser
             File.Delete(ImportDctxName);
         }
 
+        void ProcessAction()
+        {
+            switch (Path.GetExtension(FileToBeProcessed).ToUpper())
+            {
+                case ".DCT":
+                    ExportDictionaryToJson();
+                    break;
+                case ".JSON":
+                    ImportDictionaryFromJson();
+                    break;
+                default:
+                    Console.WriteLine("Invalid file selected");
+                    Console.ReadLine();
+                    break;
+            }
+        }
+
         /// <summary>
         /// Start a new shell process
         /// </summary>
@@ -142,17 +151,17 @@ namespace DCTVersioniser
             return process.Start() && process.WaitForExit(1000 * 60 * 5);
         }
 
-        string ClarionLocation { get; set; }
+        string CommandLineLocation { get; set; }
         string DateTimeStamp
         {
             get
             {
-                return "--" + 
-                    DateTime.Now.Year.ToString()   + "-"  +
-                    DateTime.Now.Month.ToString()  + "-"  +
-                    DateTime.Now.Day.ToString()    + "--" +
-                    DateTime.Now.Hour.ToString()   + "-"  +
-                    DateTime.Now.Minute.ToString() + "-"  +
+                return "--" +
+                    DateTime.Now.Year.ToString() + "-" +
+                    DateTime.Now.Month.ToString() + "-" +
+                    DateTime.Now.Day.ToString() + "--" +
+                    DateTime.Now.Hour.ToString() + "-" +
+                    DateTime.Now.Minute.ToString() + "-" +
                     DateTime.Now.Second.ToString();
             }
         }
@@ -166,13 +175,6 @@ namespace DCTVersioniser
             get
             {
                 return $@"-dx ""{FileToBeProcessed}"" ""{TemporyDctxName}""";
-            }
-        }
-        string JsonName
-        {
-            get
-            {
-                return Path.GetDirectoryName(FileToBeProcessed) + "\\" + Path.GetFileNameWithoutExtension(FileToBeProcessed) + ".json";
             }
         }
         string ExportJsonFileNameHistory
@@ -213,6 +215,13 @@ namespace DCTVersioniser
                 return Path.GetDirectoryName(ImportDctxName) + "\\" + Path.GetFileNameWithoutExtension(ImportDctxName) + ".dct";
             }
         }
+        string JsonName
+        {
+            get
+            {
+                return Path.GetDirectoryName(FileToBeProcessed) + "\\" + Path.GetFileNameWithoutExtension(FileToBeProcessed) + ".json";
+            }
+        }
 
 
         /// <summary>
@@ -232,31 +241,25 @@ namespace DCTVersioniser
         /// </summary>
         public void ProcessDictionary()
         {
-            ClarionLocation = options.ClarionClPath != null ? Path.GetDirectoryName(options.ClarionClPath) : GetLocationOfClarionCL();
-            if (!File.Exists(ClarionLocation + "\\ClarionCl.Exe"))
-                return;
-            var dct = string.Empty;
-            if (options.FileToProcess == null)
+            if (options.ClarionClPath != null)
+                CommandLineLocation = Path.GetDirectoryName(options.ClarionClPath);
+            else
+                CommandLineLocation = GetCommandLineLocation();
+            if (CommandLineLocation == null || !File.Exists(CommandLineLocation + "\\ClarionCl.Exe"))
             {
-                if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.json)|*.json", "Select the file to be processed.", out dct))
+                Console.WriteLine("No clarion command line location available");
+                return;
+            }
+            var dct = string.Empty;
+            if (options.FileToProcess != null)
+                dct = options.FileToProcess;
+            else
+            {
+                if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.json)|*.json", "Select the file to be processed.", out dct,settings))
                     return;
             }
-            else
-                dct = options.FileToProcess;
             FileToBeProcessed = dct;
-            switch (Path.GetExtension(FileToBeProcessed).ToUpper())
-            {
-                case ".DCT":
-                    ExportDictionaryToJson();
-                    break;
-                case ".JSON":
-                    ImportDictionaryFromJson();
-                    break;
-                default:
-                    Console.WriteLine("Invalid file selected");
-                    Console.ReadLine();
-                    break;
-            }
+            ProcessAction();
         }
 
         /// <summary>
