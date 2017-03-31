@@ -21,8 +21,8 @@ namespace DCTVersioniser
             var doc = new XmlDocument();
             doc.Load(TemporyDctxName);
             var json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
-            Console.WriteLine("Saving file: " + ExportJsonFileName);
-            WriteFile(ExportJsonFileName, json);
+            Console.WriteLine("Saving file: " + JsonName);
+            WriteFile(JsonName, json);
             if (SaveHistory)
             {
                 Console.WriteLine("Saving file: " + ExportJsonFileNameHistory);
@@ -147,8 +147,13 @@ namespace DCTVersioniser
         {
             get
             {
-                return "--" + DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "--" +
-                    DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
+                return "--" + 
+                    DateTime.Now.Year.ToString()   + "-"  +
+                    DateTime.Now.Month.ToString()  + "-"  +
+                    DateTime.Now.Day.ToString()    + "--" +
+                    DateTime.Now.Hour.ToString()   + "-"  +
+                    DateTime.Now.Minute.ToString() + "-"  +
+                    DateTime.Now.Second.ToString();
             }
         }
 
@@ -163,7 +168,7 @@ namespace DCTVersioniser
                 return $@"-dx ""{FileToBeProcessed}"" ""{TemporyDctxName}""";
             }
         }
-        string ExportJsonFileName
+        string JsonName
         {
             get
             {
