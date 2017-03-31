@@ -17,13 +17,13 @@ namespace DCTVersioniser
         {
             var help = new HelpText
             {
-                Heading = new HeadingInfo("<>", "<>"),
-                Copyright = new CopyrightInfo("<>", 2012),
+                Heading = new HeadingInfo("DCTVersioniser", ""),
+              //  Copyright = new CopyrightInfo("<>", 2017),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };
-            help.AddPreOptionsLine("<>");
-            help.AddPreOptionsLine("Usage: app -pSomeone");
+         //   help.AddPreOptionsLine("<>");
+            help.AddPreOptionsLine("Usage: DCTVersioniser -options");
             help.AddOptions(this);
             return help;
         }
