@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
 using System.Xml;
 
 namespace DCTVersioniser
@@ -40,7 +39,7 @@ namespace DCTVersioniser
             }
         }
 
-        static object GetRegValue(string value, object defaultValue=null)
+        static object GetRegValue(string value, object defaultValue = null)
         {
             return Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", value, defaultValue);
         }
@@ -62,12 +61,11 @@ namespace DCTVersioniser
             {
                 ConvertDctxToJsonAndSave();
                 File.Delete(TemporyDctxName);
+                Console.Write("Action Complete");
+                return;
             }
-            else
-            {
-                Console.WriteLine("Failed to export dictionary. Press any key to exit.");
-                Console.ReadLine();
-            }
+            Console.WriteLine("Failed to export dictionary. Press any key to exit.");
+            Console.ReadLine();
         }
 
 
@@ -129,6 +127,8 @@ namespace DCTVersioniser
                 Console.WriteLine("Failed to import Json file. Press Any Key");
                 Console.ReadLine();
             }
+            else
+                Console.WriteLine("Action Complete");
             File.Delete(ImportDctxName);
         }
 
