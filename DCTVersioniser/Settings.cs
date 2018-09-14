@@ -16,16 +16,14 @@ namespace DCTVersioniser
                 Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "tpsPath", Path.GetDirectoryName(value));
             }
         }
-        public string BinDirectoryLocation
+
+        public string GetBinDirectoryLocation()
         {
-            set
-            {
-                Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "clarionclpath", value);
-            }
-            get
-            {
-                return (string)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "clarionclpath", null);
-            }
+            return (string)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "clarionclpath", null);
+        }
+        public void SetBinDirectoryLocation(string value)
+        {
+            Registry.SetValue(@"HKEY_CURRENT_USER\SOFTWARE\msarson\dctversioniser", "clarionclpath", value);
         }
         public bool SaveHistory
         {

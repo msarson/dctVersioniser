@@ -22,21 +22,22 @@ namespace DCTVersioniser
             }
         }
 
-        public static string SelectClarionCL()
+        public static string SelectLocationOfClarionCommandLine()
         {
 
-            using (var clarionBinFolder = new FolderBrowserDialog { Description = "Select Clarion Bin Folder" })
+            using (var clarionBinFolder = new FolderBrowserDialog { Description = "Select Your Clarion Bin Folder" })
             {
-                var clarionFolder = string.Empty;
+                
                 clarionBinFolder.SelectedPath = string.Empty;
-
-                clarionBinFolder.ShowDialog();
-                if (clarionBinFolder.SelectedPath == string.Empty)
-
+                var dr = clarionBinFolder.ShowDialog();
+                if (dr == DialogResult.Cancel)
+                {
                     return null;
-
-
-                return clarionBinFolder.SelectedPath;
+                }
+                else
+                {
+                    return clarionBinFolder.SelectedPath;
+                }
             }
 
         }
