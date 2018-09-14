@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +10,7 @@ namespace DCTVersioniser
     {
         Options options;
         Settings settings;
+
         public ClarionDictionaryProcessing(Options options)
         {
             this.options = options;
@@ -54,7 +54,7 @@ namespace DCTVersioniser
             Console.WriteLine("Failed to export dictionary. Press any key to exit.");
             Console.ReadLine();
         }
-      
+
 
         /// <summary>
         /// Find out location of the clarioncl.exe folder and if the file
@@ -66,14 +66,14 @@ namespace DCTVersioniser
             var binDir = settings.BinDirectoryLocation;
             if (binDir == null || !File.Exists(binDir + "\\ClarionCl.Exe"))
             {
-                binDir =  ImportExportFileDialogs.SelectClarionCL();
+                binDir = ImportExportFileDialogs.SelectClarionCL();
                 if (binDir != null)
                     settings.BinDirectoryLocation = binDir;
             }
             return binDir;
         }
 
-  
+
         ProcessStartInfo GetStartInfoForExport()
         {
             return new ProcessStartInfo
@@ -241,10 +241,7 @@ namespace DCTVersioniser
         /// </summary>
         public void ProcessDictionary()
         {
-            if (options.ClarionClPath != null)
-                CommandLineLocation = Path.GetDirectoryName(options.ClarionClPath);
-            else
-                CommandLineLocation = GetCommandLineLocation();
+            CommandLineLocation = options.ClarionClPath == null ? GetCommandLineLocation() : Path.GetDirectoryName(options.ClarionClPath);
             if (CommandLineLocation == null || !File.Exists(CommandLineLocation + "\\ClarionCl.Exe"))
             {
                 Console.WriteLine("No clarion command line location available");
@@ -254,10 +251,8 @@ namespace DCTVersioniser
             if (options.FileToProcess != null)
                 dct = options.FileToProcess;
             else
-            {
-                if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.json)|*.json", "Select the file to be processed.", out dct,settings))
-                    return;
-            }
+                if (ImportExportFileDialogs.OpenFileDialog("DCT Files (.dct)|*.dct|JSON Files (.json)|*.json", "Select the file to be processed.", out dct, settings))
+                return;
             FileToBeProcessed = dct;
             ProcessAction();
         }

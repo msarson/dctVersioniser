@@ -44,7 +44,6 @@ namespace DCTVersioniser
                         continueToProcess = false;
                     }
                 }
-
                 if (continueToProcess && options.FileToProcess != null)
                 {
 
@@ -59,7 +58,6 @@ namespace DCTVersioniser
                         continueToProcess = false;
                     }
                 }
-
                 if (continueToProcess)
                 {
                     var dctProcessing = new ClarionDictionaryProcessing(options);
@@ -71,16 +69,7 @@ namespace DCTVersioniser
                     Console.WriteLine("For help use DCTversioniser --help");
 
                 }
-                // Values are available here
-             
             }
-
-       
-            
-
-
-            //Clipboard.SetText(json);
-
         }
        
        

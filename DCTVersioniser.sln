@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCTVersioniser", "DCTVersioniser\DCTVersioniser.csproj", "{3FA98197-544D-487F-A8F8-B258A7B4E47A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DCTEditor", "DCTEditor\DCTEditor.csproj", "{44C329CF-011D-4982-AB78-7C9270E88B6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{3FA98197-544D-487F-A8F8-B258A7B4E47A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FA98197-544D-487F-A8F8-B258A7B4E47A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FA98197-544D-487F-A8F8-B258A7B4E47A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44C329CF-011D-4982-AB78-7C9270E88B6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44C329CF-011D-4982-AB78-7C9270E88B6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44C329CF-011D-4982-AB78-7C9270E88B6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44C329CF-011D-4982-AB78-7C9270E88B6F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
